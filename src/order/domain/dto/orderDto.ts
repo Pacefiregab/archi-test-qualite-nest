@@ -8,11 +8,9 @@ export class OrderItemDTO {
     productName: string;
 
     @IsInt()
-    @Max(5, { message: 'Quantity must be at most 5' })
     quantity: number;
 
     @IsInt()
-    @Min(10, { message: 'Price must be at least 10 euro' })
     price: number;
 }
 
