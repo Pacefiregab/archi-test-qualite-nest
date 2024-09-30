@@ -1,10 +1,10 @@
 import { BadRequestException } from "@nestjs/common";
-import { CreateOrderDTO, OrderItemDTO } from "../domain/dto/orderDto";
+import { OrderDTO, OrderItemDTO } from "../domain/dto/orderDto";
 import { Order } from "../domain/entity/order.entity";
 
 export default class CreateOrderService {
 
-    async createOrder(createOrderDto: CreateOrderDTO): Promise<string> {
+    async createOrder(createOrderDto: OrderDTO): Promise<string> {
         const { orderItems } = createOrderDto;
 
         let totalPrice = this.itemTotalPrice(orderItems);
@@ -19,11 +19,11 @@ export default class CreateOrderService {
         return 'OK';
     }
 
-    itemTotalPrice(orderItems: OrderItemDTO[]): number {
+    private itemTotalPrice(orderItems: OrderItemDTO[]): number {
         return orderItems.reduce((total, item) => total + item.price * item.quantity, 0);
     }
 
-    totalItems(orderItems: OrderItemDTO[]): number {
+    private totalItems(orderItems: OrderItemDTO[]): number {
         return orderItems.reduce((total, item) => total + item.quantity, 0);
     }
 }

@@ -1,6 +1,7 @@
 // create-order.dto.ts
 import { IsNotEmpty, IsString, ValidateNested, ArrayMaxSize, Min, IsInt, Max } from 'class-validator';
 import { Type } from 'class-transformer';
+import { IsUUID } from 'class-validator';
 
 export class OrderItemDTO {
     @IsNotEmpty()
@@ -14,7 +15,10 @@ export class OrderItemDTO {
     price: number;
 }
 
-export class CreateOrderDTO {
+export class OrderDTO {
+    @IsString()
+    id?: string;
+
     @IsNotEmpty()
     @IsString()
     customerName: string;
@@ -31,4 +35,9 @@ export class CreateOrderDTO {
     @ArrayMaxSize(5, { message: 'Cannot order more than 5 items' })
     @Type(() => OrderItemDTO)
     orderItems: OrderItemDTO[];
+}
+
+export enum OrderStatus {
+    PENDING = 'Pending',
+    PAID = 'Paid',
 }
