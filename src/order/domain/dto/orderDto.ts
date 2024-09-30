@@ -2,7 +2,7 @@
 import { IsNotEmpty, IsString, ValidateNested, ArrayMaxSize, Min, IsInt, Max } from 'class-validator';
 import { Type } from 'class-transformer';
 
-class OrderItemDTO {
+export class OrderItemDTO {
     @IsNotEmpty()
     @IsString()
     productName: string;
