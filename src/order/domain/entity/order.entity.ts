@@ -36,8 +36,10 @@ export class Order {
   @Expose({ groups: ['group_orders'] })
   shippingAddress: string | null;
 
+  @Column({ nullable: true })
+  @Expose({ groups: ['group_orders'] })
   invoiceAddress: string | null;
-
+  
   @Column({ nullable: true })
   @Expose({ groups: ['group_orders'] })
   shippingAddressSetAt: Date | null;
