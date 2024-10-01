@@ -112,6 +112,7 @@ export class Order {
 
     this.price += Order.SHIPPING_PRICE;
     this.shippingAddress = deliveryAdress;
+    this.shippingAddressSetAt = new Date();
 
   }
 
