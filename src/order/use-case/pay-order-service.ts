@@ -5,26 +5,14 @@ import { OrderItem } from "../domain/entity/order-item.entity";
 
 export default class PayOrderService {
 
-    existingOrder: Order = {
-        id: '1',
-        customerName: 'John Doe',
-        orderItems: [
-            {
-                id: '1',
-                productName: 'item 1',
-                price: 10,
-                quantity: 1,
-                order: null
-            },
-        ],
-        shippingAddress: 'Shipping address',
-        invoiceAddress: 'Invoice address',
-        createdAt: new Date(),
-        price: 10,
-        shippingAddressSetAt: new Date(),
-        status: OrderStatus.PENDING,
-        paidAt: null
-    };
+    existingOrder: Order = new Order('1', 'John Doe', [
+        {
+            id: '1',
+            productName: 'item 1',
+            price: 10,
+            quantity: 1,
+            order: null
+        },], 'Shipping address', 'Invoice address', OrderStatus.PENDING, 10);;
 
 
 
@@ -33,8 +21,7 @@ export default class PayOrderService {
             throw new BadRequestException('Order ID is required');
         }
         const orderToUpdate: Order = this.getFakeExisitngOrder(orderDto);
-        orderToUpdate.status = OrderStatus.PAID;
-        orderToUpdate.paidAt = new Date();
+        orderToUpdate.pay();
         return 'Paid';
     }
 
