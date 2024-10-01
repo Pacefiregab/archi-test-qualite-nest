@@ -6,8 +6,51 @@ import {
   OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import { Expose } from 'class-transformer';
-import { OrderStatus } from '../dto/orderDto';
+import { Expose, Type } from 'class-transformer';
+import { ArrayMaxSize, IsInt, IsNotEmpty, IsString, ValidateNested } from 'class-validator';
+import { BadRequestException } from '@nestjs/common';
+
+
+export class OrderItemDTO {
+  @IsNotEmpty()
+  @IsString()
+  productName: string;
+
+  @IsInt()
+  quantity: number;
+
+  @IsInt()
+  price: number;
+}
+
+export class OrderDTO {
+  @IsString()
+  id?: string;
+
+  @IsNotEmpty()
+  @IsString()
+  customerName: string;
+
+  @IsString()
+  shippingAddress: string;
+
+  @IsNotEmpty()
+  @IsString()
+  invoiceAddress: string;
+
+  @ValidateNested({ each: true })
+  @ArrayMaxSize(5, { message: 'Cannot order more than 5 items' })
+  @Type(() => OrderItemDTO)
+  orderItems: OrderItemDTO[];
+}
+
+export enum OrderStatus {
+  PENDING = 'Pending',
+  PAID = 'Paid',
+  DELIVERED = "DELIVERED",
+  SHIPPING_ADRESS_SET = "SHIPPING_ADRESS_SET",
+}
+
 @Entity()
 export class Order {
 
@@ -16,7 +59,7 @@ export class Order {
   static MAX_ORDER_PRICE: number = 500;
   static SHIPPING_PRICE: number = 5;
 
-  //the constructor of the class
+  //the constructor for the fixtures of the class
   constructor(
     id?: string,
     customerName?: string,
@@ -42,10 +85,33 @@ export class Order {
     invoiceAddress: string | null
   ): Order {
     const order = new Order();
+
     order.customerName = customerName;
     order.orderItems = orderItems;
     order.createdAt = new Date();
     order.invoiceAddress = invoiceAddress;
+
+    if (Order.totalItems(orderItems) > Order.MAX_ORDER_ITEMS) {
+      throw new BadRequestException('Cannot order more than 5 items');
+    }
+
+    if (Order.itemTotalPrice(orderItems) < Order.MIN_ORDER_PRICE) {
+      throw new BadRequestException('Total price must be at least 10 euros');
+    }
+    return order;
+  }
+
+  static newOrderFromDTO(orderDTO: OrderDTO): Order {
+    const orderItems: OrderItem[] = orderDTO.orderItems.map(item => new OrderItem(item.productName, item.quantity, item.price));
+    const order = new Order(
+      orderDTO.id,
+      orderDTO.customerName,
+      orderItems,
+      orderDTO.shippingAddress,
+      orderDTO.invoiceAddress,
+      OrderStatus.PENDING,
+      orderItems.reduce((total, item) => total + item.price * item.quantity, 0)
+    );
     return order;
   }
 
@@ -106,7 +172,7 @@ export class Order {
     if (this.status !== OrderStatus.PENDING && this.status !== OrderStatus.SHIPPING_ADRESS_SET) {
       throw new Error('Order is not paid');
     }
-    if (this.totalItems() > 3) {
+    if (Order.totalItems(this.orderItems) > 3) {
       this.status = OrderStatus.DELIVERED;
     }
 
@@ -116,11 +182,11 @@ export class Order {
 
   }
 
-  totalItems(): number {
-    return this.orderItems.reduce((total, item) => total + item.quantity, 0);
+  static totalItems(orderItems: OrderItem[]): number {
+    return orderItems.reduce((total, item) => total + item.quantity, 0);
   }
 
-  itemTotalPrice(): number {
-    return this.orderItems.reduce((total, item) => total + item.price * item.quantity, 0);
+  static itemTotalPrice(orderItems: OrderItem[]): number {
+    return orderItems.reduce((total, item) => total + item.price * item.quantity, 0);
   }
 }

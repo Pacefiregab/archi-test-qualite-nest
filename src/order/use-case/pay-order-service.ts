@@ -1,6 +1,5 @@
 import { BadRequestException } from "@nestjs/common";
-import { OrderDTO, OrderItemDTO, OrderStatus } from "../domain/dto/orderDto";
-import { Order } from "../domain/entity/order.entity";
+import { Order, OrderDTO, OrderStatus } from "../domain/entity/order.entity";
 import { OrderItem } from "../domain/entity/order-item.entity";
 
 export default class PayOrderService {

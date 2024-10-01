@@ -3,6 +3,11 @@ import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity('order-item')
 export class OrderItem {
+  constructor(productName: string, quantity: number, price: number) {
+    this.productName = productName;
+    this.quantity = quantity;
+    this.price = price;
+  }
   @PrimaryGeneratedColumn('uuid')
   id: string;
 

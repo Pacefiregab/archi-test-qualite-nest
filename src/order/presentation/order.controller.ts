@@ -1,7 +1,6 @@
 import { Controller, Get, Post, Body, BadRequestException, Inject, Put } from '@nestjs/common';
-import { OrderDTO } from '../domain/dto/orderDto';
 import { validate } from 'class-validator';
-import { Order } from '../domain/entity/order.entity';
+import { OrderDTO } from '../domain/entity/order.entity';
 import CreateOrderService from '../use-case/create-order-service';
 import PayOrderService from '../use-case/pay-order-service';
 import GetDeliveryService from '../use-case/set-delivery-info';

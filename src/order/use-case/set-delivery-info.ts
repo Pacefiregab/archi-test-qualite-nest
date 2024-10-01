@@ -1,5 +1,4 @@
-import { OrderDTO, OrderStatus } from "../domain/dto/orderDto";
-import { Order } from "../domain/entity/order.entity";
+import { Order, OrderDTO, OrderStatus } from "../domain/entity/order.entity";
 
 export default class SetDeliveryService {
 
@@ -21,7 +20,9 @@ export default class SetDeliveryService {
         if (!order || !order.id) {
             throw new Error('Order ID is required');
         }
+
         const orderToUpdate: Order = this.getFakeExisitngOrder(order);
+
         orderToUpdate.setDelivery(order.shippingAddress);
         return orderToUpdate;
     }
