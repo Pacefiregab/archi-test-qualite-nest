@@ -6,16 +6,9 @@ import { randomUUID } from "crypto";
 export default class CreateOrderService {
 
     async createOrder(createOrderDto: OrderDTO): Promise<string> {
-        const orderItemsEntity: OrderItem[] = createOrderDto.orderItems.map(item => ({
-            id: randomUUID(),
-            price: item.price,
-            productName: item.productName,
-            quantity: item.quantity,
-            order: null
-        }));
-        const order = Order.newOrder(
+        const order = new Order(
             createOrderDto.customerName,
-            orderItemsEntity,
+            createOrderDto.orderItems,
             createOrderDto.invoiceAddress
         );
 

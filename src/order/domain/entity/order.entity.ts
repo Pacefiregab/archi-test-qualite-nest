@@ -59,60 +59,23 @@ export class Order {
   static MAX_ORDER_PRICE: number = 500;
   static SHIPPING_PRICE: number = 5;
 
-  //the constructor for the fixtures of the class
   constructor(
-    id?: string,
-    customerName?: string,
-    orderItems?: OrderItem[],
-    shippingAddress?: string | null,
-    invoiceAddress?: string | null,
-    status?: string,
-    price?: number
-  ) {
-    this.id = id;
-    this.customerName = customerName;
-    this.orderItems = orderItems;
-    this.createdAt = new Date();
-    this.shippingAddress = shippingAddress;
-    this.invoiceAddress = invoiceAddress;
-    this.status = status;
-    this.price = price;
-  }
-
-  static newOrder(
     customerName: string,
-    orderItems: OrderItem[],
+    orderItems: OrderItemDTO[],
     invoiceAddress: string | null
-  ): Order {
-    const order = new Order();
-
-    order.customerName = customerName;
-    order.orderItems = orderItems;
-    order.createdAt = new Date();
-    order.invoiceAddress = invoiceAddress;
-
-    if (Order.totalItems(orderItems) > Order.MAX_ORDER_ITEMS) {
+  ) {
+    if (this.getTotalItems(orderItems) > Order.MAX_ORDER_ITEMS) {
       throw new BadRequestException('Cannot order more than 5 items');
     }
 
-    if (Order.itemTotalPrice(orderItems) < Order.MIN_ORDER_PRICE) {
+    if (this.itemTotalPrice() < Order.MIN_ORDER_PRICE) {
       throw new BadRequestException('Total price must be at least 10 euros');
     }
-    return order;
-  }
 
-  static newOrderFromDTO(orderDTO: OrderDTO): Order {
-    const orderItems: OrderItem[] = orderDTO.orderItems.map(item => new OrderItem(item.productName, item.quantity, item.price));
-    const order = new Order(
-      orderDTO.id,
-      orderDTO.customerName,
-      orderItems,
-      orderDTO.shippingAddress,
-      orderDTO.invoiceAddress,
-      OrderStatus.PENDING,
-      orderItems.reduce((total, item) => total + item.price * item.quantity, 0)
-    );
-    return order;
+    this.orderItems = orderItems.map(item => new OrderItem(item.productName, item.quantity, item.price));
+    this.customerName = customerName;
+    this.createdAt = new Date();
+    this.invoiceAddress = invoiceAddress;
   }
 
   @CreateDateColumn()
@@ -172,7 +135,8 @@ export class Order {
     if (this.status !== OrderStatus.PENDING && this.status !== OrderStatus.SHIPPING_ADRESS_SET) {
       throw new Error('Order is not paid');
     }
-    if (Order.totalItems(this.orderItems) > 3) {
+
+    if (this.getTotalItems(this.orderItems) > 3) {
       this.status = OrderStatus.DELIVERED;
     }
 
@@ -182,11 +146,11 @@ export class Order {
 
   }
 
-  static totalItems(orderItems: OrderItem[]): number {
+  private getTotalItems(orderItems: { quantity: number }[]): number {
     return orderItems.reduce((total, item) => total + item.quantity, 0);
   }
 
-  static itemTotalPrice(orderItems: OrderItem[]): number {
-    return orderItems.reduce((total, item) => total + item.price * item.quantity, 0);
+  private itemTotalPrice(): number {
+    return this.orderItems.reduce((total, item) => total + item.price * item.quantity, 0);
   }
 }
