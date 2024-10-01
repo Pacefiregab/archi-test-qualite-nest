@@ -3,7 +3,8 @@ import { validate } from 'class-validator';
 import { OrderDTO } from '../domain/entity/order.entity';
 import CreateOrderService from '../use-case/create-order-service';
 import PayOrderService from '../use-case/pay-order-service';
-import GetDeliveryService from '../use-case/set-delivery-info';
+import SetDeliveryAdressService from '../use-case/set-delivery-info';
+import SetInvoiceService from '../use-case/set-invoice-service';
 
 @Controller('/orders')
 export default class OrderController {
@@ -12,8 +13,10 @@ export default class OrderController {
     private readonly createOrderService: CreateOrderService,
     @Inject(PayOrderService)
     private readonly payOrderService: PayOrderService,
-    @Inject(GetDeliveryService)
-    private readonly deliveryService: GetDeliveryService
+    @Inject(SetDeliveryAdressService)
+    private readonly deliveryAdressService: SetDeliveryAdressService,
+    @Inject(SetInvoiceService)
+    private readonly invoiceService: SetInvoiceService
   ) { }
 
   @Get()
@@ -32,7 +35,13 @@ export default class OrderController {
   }
 
   @Post('/delivery')
-  async getDelivery(@Body() updateOrderDto: OrderDTO) {
-    return this.deliveryService.getDelivery(updateOrderDto);
+  async setDelivery(@Body() updateOrderDto: OrderDTO) {
+    return this.deliveryAdressService.getDelivery(updateOrderDto);
+  }
+
+
+  @Post('/invoice')
+  async setInvoice(@Body() updateOrderDto: OrderDTO) {
+    return this.invoiceService.getDelivery(updateOrderDto);
   }
 }

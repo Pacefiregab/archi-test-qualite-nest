@@ -16,9 +16,11 @@ export class OrderItemDTO {
   @IsString()
   productName: string;
 
+  @IsNotEmpty()
   @IsInt()
   quantity: number;
 
+  @IsNotEmpty()
   @IsInt()
   price: number;
 }
@@ -34,7 +36,6 @@ export class OrderDTO {
   @IsString()
   shippingAddress: string;
 
-  @IsNotEmpty()
   @IsString()
   invoiceAddress: string;
 
@@ -68,14 +69,16 @@ export class Order {
       throw new BadRequestException('Cannot order more than 5 items');
     }
 
-    if (this.itemTotalPrice() < Order.MIN_ORDER_PRICE) {
+    const totalPrice = this.itemTotalPrice();
+
+    if (totalPrice < Order.MIN_ORDER_PRICE) {
       throw new BadRequestException('Total price must be at least 10 euros');
     }
 
     this.orderItems = orderItems.map(item => new OrderItem(item.productName, item.quantity, item.price));
     this.customerName = customerName;
     this.createdAt = new Date();
-    this.invoiceAddress = invoiceAddress;
+    this.price = totalPrice;
   }
 
   @CreateDateColumn()
@@ -120,6 +123,8 @@ export class Order {
   @Expose({ groups: ['group_orders'] })
   paidAt: Date | null;
 
+  @Column({ nullable: true })
+
   pay() {
     if (this.price > Order.MAX_ORDER_PRICE) {
       throw new Error('Order price is too high');
@@ -136,14 +141,27 @@ export class Order {
       throw new Error('Order is not paid');
     }
 
-    if (this.getTotalItems(this.orderItems) > 3) {
-      this.status = OrderStatus.DELIVERED;
+    if (this.getTotalItems(this.orderItems) < 3) {
+      throw new Error('Cannot ship less than 3 items');
     }
 
+    this.status = OrderStatus.SHIPPING_ADRESS_SET;
     this.price += Order.SHIPPING_PRICE;
     this.shippingAddress = deliveryAdress;
     this.shippingAddressSetAt = new Date();
 
+  }
+
+  sertInvoice(invoiceAddress: string) {
+    if (this.status !== OrderStatus.SHIPPING_ADRESS_SET) {
+      throw new Error('Order doesnt have a shipping address');
+    }
+
+    if (!invoiceAddress || invoiceAddress === '') {
+      invoiceAddress = this.shippingAddress;
+    }
+    this.status = OrderStatus.SHIPPING_ADRESS_SET;
+    this.invoiceAddress = invoiceAddress;
   }
 
   private getTotalItems(orderItems: { quantity: number }[]): number {
