@@ -1,22 +1,18 @@
 import { Order, OrderDTO, OrderStatus } from "../domain/entity/order.entity";
+import OrderRepository from "../infrastructure/order.repository";
 
 export default class SetInvoiceService {
 
 
+    constructor(private readonly orderRepository: OrderRepository) { }
 
-
-    setInvoice(order: OrderDTO): Order {
-        if (!order || !order.id) {
+    async setInvoice(order: OrderDTO): Promise<Order> {
+        const orderEntity = await this.orderRepository.findById(order.id);
+        if (!orderEntity) {
             throw new Error('Order ID is required');
         }
 
-        const orderToUpdate: Order = this.getFakeExisitngOrder(order);
-
-        orderToUpdate.setInvoice(order.invoiceAddress);
-        return orderToUpdate;
-    }
-
-    private getFakeExisitngOrder(orderDto: OrderDTO): Order {
-        return new Order(orderDto.customerName, orderDto.orderItems, orderDto.invoiceAddress);
+        orderEntity.setInvoice(order.invoiceAddress);
+        return this.orderRepository.save(orderEntity);
     }
 }

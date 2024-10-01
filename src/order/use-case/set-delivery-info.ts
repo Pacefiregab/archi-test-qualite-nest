@@ -1,19 +1,17 @@
 import { Order, OrderDTO, OrderStatus } from "../domain/entity/order.entity";
+import OrderRepository from "../infrastructure/order.repository";
 
 export default class GetDeliveryAdressService {
 
-    setDelivery(order: OrderDTO): Order {
-        if (!order || !order.id) {
+    constructor(private readonly orderRepository: OrderRepository) { }
+
+    async setDelivery(order: OrderDTO): Promise<Order> {
+        const orderEntity = await this.orderRepository.findById(order.id);
+        if (!orderEntity) {
             throw new Error('Order ID is required');
         }
 
-        const orderToUpdate: Order = this.getFakeExisitngOrder(order);
-
-        orderToUpdate.setDelivery(order.shippingAddress);
-        return orderToUpdate;
-    }
-
-    private getFakeExisitngOrder(orderDto: OrderDTO): Order {
-        return new Order(orderDto.customerName, orderDto.orderItems, orderDto.invoiceAddress);
+        orderEntity.setDelivery(order.shippingAddress);
+        return this.orderRepository.save(orderEntity);
     }
 }

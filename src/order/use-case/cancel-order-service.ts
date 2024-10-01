@@ -1,20 +1,17 @@
 import { Order, OrderDTO } from "../domain/entity/order.entity";
+import OrderRepository from "../infrastructure/order.repository";
 
-export default class SetInvoiceService {
+export default class CancelOrderService {
+    constructor(private readonly orderRepository: OrderRepository) { }
 
-    cancelOrder(order: OrderDTO): Order {
-        if (!order || !order.id) {
+    async cancelOrder(order: OrderDTO): Promise<Order> {
+        const orderEntity = await this.orderRepository.findById(order.id);
+        if (!orderEntity) {
             throw new Error('Order ID is required');
         }
 
-        const orderToUpdate: Order = this.getFakeExisitngOrder(order);
+        orderEntity.cancel(order.cancelationReason);
 
-        orderToUpdate.cancel(order.cancelationReason);
-
-        return orderToUpdate;
-    }
-
-    private getFakeExisitngOrder(orderDto: OrderDTO): Order {
-        return new Order(orderDto.customerName, orderDto.orderItems, orderDto.invoiceAddress);
+        return orderEntity;
     }
 }

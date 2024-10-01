@@ -1,19 +1,16 @@
-import { BadRequestException } from "@nestjs/common";
 import { Order, OrderDTO, OrderItemDTO } from "../domain/entity/order.entity";
-import { OrderItem } from "../domain/entity/order-item.entity";
-import { randomUUID } from "crypto";
+import OrderRepository from "../infrastructure/order.repository";
 
 export default class CreateOrderService {
+    constructor(private readonly orderRepository: OrderRepository) { }
 
-    async createOrder(createOrderDto: OrderDTO): Promise<string> {
+    async createOrder(createOrderDto: OrderDTO): Promise<Order> {
         const order = new Order(
             createOrderDto.customerName,
             createOrderDto.orderItems,
             createOrderDto.invoiceAddress
         );
-
-        
-        return 'OK';
+        return this.orderRepository.save(order);
     }
 
 }
