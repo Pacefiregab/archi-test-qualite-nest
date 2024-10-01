@@ -23,7 +23,6 @@ export class OrderDTO {
     @IsString()
     customerName: string;
 
-    @IsNotEmpty()
     @IsString()
     shippingAddress: string;
 
@@ -40,4 +39,6 @@ export class OrderDTO {
 export enum OrderStatus {
     PENDING = 'Pending',
     PAID = 'Paid',
+    DELIVERED = "DELIVERED",
+    SHIPPING_ADRESS_SET = "SHIPPING_ADRESS_SET",
 }

@@ -4,6 +4,7 @@ import { validate } from 'class-validator';
 import { Order } from '../domain/entity/order.entity';
 import CreateOrderService from '../use-case/create-order-service';
 import PayOrderService from '../use-case/pay-order-service';
+import GetDeliveryService from '../use-case/set-delivery-info';
 
 @Controller('/orders')
 export default class OrderController {
@@ -11,7 +12,9 @@ export default class OrderController {
     @Inject(CreateOrderService)
     private readonly createOrderService: CreateOrderService,
     @Inject(PayOrderService)
-    private readonly payOrderService: PayOrderService
+    private readonly payOrderService: PayOrderService,
+    @Inject(GetDeliveryService)
+    private readonly deliveryService: GetDeliveryService
   ) { }
 
   @Get()
@@ -27,5 +30,10 @@ export default class OrderController {
   @Put()
   async payOrder(@Body() updateOrderDto: OrderDTO): Promise<string> {
     return this.payOrderService.payOrder(updateOrderDto);
+  }
+
+  @Post('/delivery')
+  async getDelivery(@Body() updateOrderDto: OrderDTO) {
+    return this.deliveryService.getDelivery(updateOrderDto);
   }
 }

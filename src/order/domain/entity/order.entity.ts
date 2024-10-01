@@ -14,16 +14,17 @@ export class Order {
   static MAX_ORDER_ITEMS: number = 5;
   static MIN_ORDER_PRICE: number = 10;
   static MAX_ORDER_PRICE: number = 500;
+  static SHIPPING_PRICE: number = 5;
 
   //the constructor of the class
   constructor(
-    id: string,
-    customerName: string,
-    orderItems: OrderItem[],
-    shippingAddress: string | null,
-    invoiceAddress: string | null,
-    status: string,
-    price: number
+    id?: string,
+    customerName?: string,
+    orderItems?: OrderItem[],
+    shippingAddress?: string | null,
+    invoiceAddress?: string | null,
+    status?: string,
+    price?: number
   ) {
     this.id = id;
     this.customerName = customerName;
@@ -33,6 +34,19 @@ export class Order {
     this.invoiceAddress = invoiceAddress;
     this.status = status;
     this.price = price;
+  }
+
+  static newOrder(
+    customerName: string,
+    orderItems: OrderItem[],
+    invoiceAddress: string | null
+  ): Order {
+    const order = new Order();
+    order.customerName = customerName;
+    order.orderItems = orderItems;
+    order.createdAt = new Date();
+    order.invoiceAddress = invoiceAddress;
+    return order;
   }
 
   @CreateDateColumn()
@@ -86,5 +100,26 @@ export class Order {
     }
     this.status = OrderStatus.PAID;
     this.paidAt = new Date();
+  }
+
+  setDelivery(deliveryAdress: string) {
+    if (this.status !== OrderStatus.PENDING && this.status !== OrderStatus.SHIPPING_ADRESS_SET) {
+      throw new Error('Order is not paid');
+    }
+    if (this.totalItems() > 3) {
+      this.status = OrderStatus.DELIVERED;
+    }
+
+    this.price += Order.SHIPPING_PRICE;
+    this.shippingAddress = deliveryAdress;
+
+  }
+
+  totalItems(): number {
+    return this.orderItems.reduce((total, item) => total + item.quantity, 0);
+  }
+
+  itemTotalPrice(): number {
+    return this.orderItems.reduce((total, item) => total + item.price * item.quantity, 0);
   }
 }
