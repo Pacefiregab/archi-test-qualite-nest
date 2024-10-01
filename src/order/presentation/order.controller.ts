@@ -34,14 +34,19 @@ export default class OrderController {
     return this.payOrderService.payOrder(updateOrderDto);
   }
 
-  @Post('/delivery')
+  @Put('/delivery')
   async setDelivery(@Body() updateOrderDto: OrderDTO) {
     return this.deliveryAdressService.getDelivery(updateOrderDto);
   }
 
 
-  @Post('/invoice')
+  @Put('/invoice')
   async setInvoice(@Body() updateOrderDto: OrderDTO) {
-    return this.invoiceService.getDelivery(updateOrderDto);
+    return this.invoiceService.setInvoice(updateOrderDto);
+  }
+
+  @Put('/cancel')
+  async cancelOrder(@Body() updateOrderDto: OrderDTO) {
+    return 'Order cancelled';
   }
 }

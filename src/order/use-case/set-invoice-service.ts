@@ -12,7 +12,7 @@ export default class SetInvoiceService {
 
         const orderToUpdate: Order = this.getFakeExisitngOrder(order);
 
-        orderToUpdate.setInvoice(order.shippingAddress);
+        orderToUpdate.setInvoice(order.invoiceAddress);
         return orderToUpdate;
     }
 

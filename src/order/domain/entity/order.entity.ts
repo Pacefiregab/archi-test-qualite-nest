@@ -152,7 +152,7 @@ export class Order {
 
   }
 
-  sertInvoice(invoiceAddress: string) {
+  setInvoice(invoiceAddress: string) {
     if (this.status !== OrderStatus.SHIPPING_ADRESS_SET) {
       throw new Error('Order doesnt have a shipping address');
     }
