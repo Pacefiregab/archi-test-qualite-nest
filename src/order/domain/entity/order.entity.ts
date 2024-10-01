@@ -43,6 +43,9 @@ export class OrderDTO {
   @ArrayMaxSize(5, { message: 'Cannot order more than 5 items' })
   @Type(() => OrderItemDTO)
   orderItems: OrderItemDTO[];
+
+  @IsString()
+  cancelationReason: string;
 }
 
 export enum OrderStatus {
@@ -50,6 +53,7 @@ export enum OrderStatus {
   PAID = 'Paid',
   DELIVERED = "DELIVERED",
   SHIPPING_ADRESS_SET = "SHIPPING_ADRESS_SET",
+  CANCELLED = "CANCELLED",
 }
 
 @Entity()
@@ -124,6 +128,14 @@ export class Order {
   paidAt: Date | null;
 
   @Column({ nullable: true })
+  @Expose({ groups: ['group_orders'] })
+  cancelationReason: string | null;
+
+  @Column({ nullable: true })
+  @Expose({ groups: ['group_orders'] })
+  cancelationDate: Date | null;
+
+
 
   pay() {
     if (this.price > Order.MAX_ORDER_PRICE) {
@@ -170,5 +182,15 @@ export class Order {
 
   private itemTotalPrice(): number {
     return this.orderItems.reduce((total, item) => total + item.price * item.quantity, 0);
+  }
+
+  cancel(reason: string) {
+    //J'ai mis paid pcq y'a pas vraiment de shipped pour l'instant 
+    if (this.status === OrderStatus.PAID) {
+      throw new Error('Cannot cancel a paid order');
+    }
+    this.status = OrderStatus.PENDING;
+    this.cancelationReason = reason;
+    this.cancelationDate = new Date();
   }
 }

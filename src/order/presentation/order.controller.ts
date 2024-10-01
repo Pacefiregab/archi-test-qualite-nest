@@ -36,7 +36,7 @@ export default class OrderController {
 
   @Put('/delivery')
   async setDelivery(@Body() updateOrderDto: OrderDTO) {
-    return this.deliveryAdressService.getDelivery(updateOrderDto);
+    return this.deliveryAdressService.setDelivery(updateOrderDto);
   }
 
 
