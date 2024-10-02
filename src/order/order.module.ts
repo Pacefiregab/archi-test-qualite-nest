@@ -1,28 +1,49 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import OrderRepository from './infrastructure/order.repository';
 import OrderController from './presentation/order.controller';
 import { Order } from './domain/entity/order.entity';
 import { OrderItem } from './domain/entity/order-item.entity';
-import CreateOrderService from './use-case/create-order-service';
-import PayOrderService from './use-case/pay-order-service';
-import SetDeliveryAdressService from './use-case/set-delivery-info';
-import SetInvoiceService from './use-case/set-invoice-service';
-import CancelOrderService from './use-case/cancel-order-service';
+import { CreateOrderService } from 'src/order/domain/use-case/create-order.service';
+import { OrderRepositoryInterface } from 'src/order/domain/port/order.repository.interface';
+import OrderRepositoryTypeOrm from 'src/order/infrastructure/order.repository';
+import { PayOrderService } from 'src/order/domain/use-case/pay-order.service';
+import { CancelOrderService } from 'src/order/domain/use-case/cancel-order.service';
+import { SetInvoiceAddressOrderService } from 'src/order/domain/use-case/set-invoice-address-order.service';
+import { SetShippingAddressOrderService } from 'src/order/domain/use-case/set-shipping-address-order.service';
 
 @Module({
   imports: [TypeOrmModule.forFeature([Order, OrderItem])],
   controllers: [OrderController],
+
   providers: [
+    OrderRepositoryTypeOrm,
     {
-      provide: 'OrderRepositoryInterface',
-      useClass: OrderRepository,
+      provide: PayOrderService,
+      useFactory: (orderRepository: OrderRepositoryInterface) => { return new PayOrderService(orderRepository); },
+      inject: [OrderRepositoryTypeOrm],
     },
-    CreateOrderService,
-    PayOrderService,
-    SetDeliveryAdressService,
-    SetInvoiceService,
-    CancelOrderService,
+    {
+      provide: CancelOrderService,
+      useFactory: (orderRepository: OrderRepositoryInterface) => { return new CancelOrderService(orderRepository); },
+      inject: [OrderRepositoryTypeOrm],
+    },
+    {
+      provide: SetInvoiceAddressOrderService,
+      useFactory: (orderRepository: OrderRepositoryInterface) => { return new SetInvoiceAddressOrderService(orderRepository); },
+      inject: [OrderRepositoryTypeOrm],
+    },
+    {
+      provide: SetShippingAddressOrderService,
+      useFactory: (orderRepository: OrderRepositoryInterface) => { return new SetShippingAddressOrderService(orderRepository); },
+      inject: [OrderRepositoryTypeOrm],
+    },
+    {
+      provide: CreateOrderService,
+      useFactory: (orderRepository: OrderRepositoryInterface) => {
+        return new CreateOrderService(orderRepository);
+      },
+      inject: [OrderRepositoryTypeOrm],
+    },
   ],
 })
 export class OrderModule { }
