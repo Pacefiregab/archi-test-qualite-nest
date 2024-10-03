@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Get, Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import OrderController from './presentation/order.controller';
 import { Order } from './domain/entity/order.entity';
@@ -10,6 +10,9 @@ import { PayOrderService } from 'src/order/domain/use-case/pay-order.service';
 import { CancelOrderService } from 'src/order/domain/use-case/cancel-order.service';
 import { SetInvoiceAddressOrderService } from 'src/order/domain/use-case/set-invoice-address-order.service';
 import { SetShippingAddressOrderService } from 'src/order/domain/use-case/set-shipping-address-order.service';
+import { PdfServiceInterface } from './domain/port/invoice.generator.interface';
+import { GetInvoiceService } from './domain/use-case/get-invoice.service';
+import PdfService from './infrastructure/pdf.generator';
 
 @Module({
   imports: [TypeOrmModule.forFeature([Order, OrderItem])],
@@ -17,6 +20,7 @@ import { SetShippingAddressOrderService } from 'src/order/domain/use-case/set-sh
 
   providers: [
     OrderRepositoryTypeOrm,
+    PdfService,
     {
       provide: PayOrderService,
       useFactory: (orderRepository: OrderRepositoryInterface) => { return new PayOrderService(orderRepository); },
@@ -44,6 +48,12 @@ import { SetShippingAddressOrderService } from 'src/order/domain/use-case/set-sh
       },
       inject: [OrderRepositoryTypeOrm],
     },
+    {
+      provide: GetInvoiceService,
+      useFactory: (orderRepository: OrderRepositoryInterface, pdfService: PdfService) => {
+        return new GetInvoiceService(orderRepository, pdfService);
+      },
+    }
   ],
 })
 export class OrderModule { }

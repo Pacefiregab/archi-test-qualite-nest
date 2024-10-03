@@ -213,4 +213,10 @@ export class Order {
     this.cancelAt = new Date('NOW');
     this.cancelReason = cancelReason;
   }
+
+  validateInvoice() {
+    if (this.status !== OrderStatus.PAID) {
+      throw new Error('Commande non payée');
+    }
+  }
 }
